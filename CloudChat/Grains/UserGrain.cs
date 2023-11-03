@@ -41,6 +41,22 @@ namespace CloudChat.Grains
             }
 
             _redis = ConnectionMultiplexer.Connect(connectionStirng);
+
+            var db = _redis.GetDatabase();
+
+            string json = db.StringGet($"users:{_state.Username}:logins");
+
+            if (!string.IsNullOrEmpty(json))
+            {
+                _state.RoomLoginsStates = JsonConvert.DeserializeObject<Dictionary<int, int>>(json);
+            }
+
+            string room = db.StringGet($"users:{_state.Username}:room");
+
+            if (!string.IsNullOrEmpty(room))
+            {
+                _state.CurrentRoomId = int.Parse(room);
+            }
         }
 
         public Task<string> BuildMessageAsync(string message)
@@ -67,13 +83,14 @@ namespace CloudChat.Grains
                 _state.RoomLoginsStates[roomId] = 1;
             }
 
+            _state.CurrentRoomId = roomId;
+
             string json = JsonConvert.SerializeObject(_state.RoomLoginsStates);
 
             IDatabase db = _redis.GetDatabase();
 
-            db.StringSet($"users:{_state.Username}", json);
-
-            _state.CurrentRoomId = roomId;
+            db.StringSet($"users:{_state.Username}:logins", json);
+            db.StringSet($"users:{_state.Username}:room", roomId);
 
             return Task.CompletedTask;
         }
@@ -94,11 +111,18 @@ namespace CloudChat.Grains
                 RoomLoginsStates = new Dictionary<int, int>()
             };
 
-            string json = db.StringGet($"users:{_state.Username}");
+            string json = db.StringGet($"users:{_state.Username}:logins");
 
             if (!string.IsNullOrEmpty(json))
             {
                 _state.RoomLoginsStates = JsonConvert.DeserializeObject<Dictionary<int, int>>(json);
+            }
+
+            string room = db.StringGet($"users:{_state.Username}:room");
+
+            if (!string.IsNullOrEmpty(json))
+            {
+                _state.CurrentRoomId = int.Parse(room);
             }
 
             return base.OnActivateAsync(cancellationToken);

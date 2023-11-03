@@ -10,8 +10,6 @@ namespace CloudChat.Grains
 
     public class RoomGrain : Grain, IRoomGrain
     {
-        private string[] _messages;
-
         private ConnectionMultiplexer _redis;
 
         public RoomGrain(IConfiguration configuration)
@@ -24,27 +22,20 @@ namespace CloudChat.Grains
             }
 
             _redis = ConnectionMultiplexer.Connect(connectionStirng);
-
-            _messages = new string[10];
         }
 
         public async Task<string[]> GetLatestMessagesAsync()
         {
             IDatabase db = _redis.GetDatabase();
 
-            int start = -10;      // Start index (negative index indicates counting from the end)
+            int start = -5;      // Start index (negative index indicates counting from the end)
 
             int stop = -1;       // Stop index (inclusive)
 
-            // Retrieve the latest 10 items from the end of the list
-            RedisValue[] latestItems = await db.ListRangeAsync(this.GetPrimaryKey().ToString(), start, stop);
+            // Retrieve the latest 5 items from the end of the list
+            RedisValue[] latestItems = await db.ListRangeAsync($"rooms:{this.GetPrimaryKey()}:messages", start, stop);
 
-            for (int i = 0; i < latestItems.Length; i++)
-            {
-                _messages[i] = latestItems[i].ToString();
-            }
-
-            return _messages;
+            return latestItems.Select(value => value.ToString()).ToArray();
         }
 
         public async Task SaveMessageAsync(string message)
@@ -52,7 +43,7 @@ namespace CloudChat.Grains
             IDatabase db = _redis.GetDatabase();
 
             // Push the message to the right end of the list
-            await db.ListRightPushAsync(this.GetPrimaryKey().ToString(), message);
+            await db.ListRightPushAsync($"rooms:{this.GetPrimaryKey()}:messages", message);
         }
     }
 }

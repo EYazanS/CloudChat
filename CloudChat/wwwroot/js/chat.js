@@ -16,9 +16,10 @@ connection.on("ReceiveMessage", function (message) { appendMessage(message) });
 connection.on("ReceiveError", function (message) { appendMessage(message, "#FF0000") });
 
 connection.on("BulkReceiveMessages", function (messages) {
-    console.log({ messages })
     messages.forEach(message => {
-        appendMessage(message);
+        if (message) {
+            appendMessage(message);
+        }
     })
 });
 
@@ -65,12 +66,19 @@ document.getElementById("commands-form").addEventListener("submit", function (ev
 });
 
 document.getElementById("login-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
     username = document.getElementById("username").value;
+
+    connection
+        .invoke("ActivateUser", username)
+        .catch(function (err) {
+            return console.error(err.toString());
+        });
 
     document.getElementById("login-page").style.display = "none";
     document.getElementById("chat-page").style.display = "block";
     document.getElementById("messageInput").focus();
-    event.preventDefault();
 });
 
 document.getElementById("username").focus();

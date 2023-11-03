@@ -13,7 +13,7 @@ namespace CloudChat.Hubs
             _grains = grains;
         }
 
-        public async Task SendMessage(string username, string message)
+        public async Task ActivateUser(string username)
         {
             var user = _grains.GetGrain<IUserGrain>(username);
 
@@ -21,11 +21,29 @@ namespace CloudChat.Hubs
 
             if (currentRoom != null)
             {
-                var builtMessage = await user.BuildMessageAsync(message);
+                await Groups.AddToGroupAsync(Context.ConnectionId, currentRoom.ToString());
+
+                IRoomGrain room = _grains.GetGrain<IRoomGrain>(currentRoom.Value);
+
+                string[] messages = await room.GetLatestMessagesAsync();
+
+                await Clients.Client(Context.ConnectionId).SendAsync("BulkReceiveMessages", messages);
+            }
+        }
+
+        public async Task SendMessage(string username, string message)
+        {
+            IUserGrain user = _grains.GetGrain<IUserGrain>(username);
+
+            int? currentRoom = await user.GetRoomIdAsync();
+
+            if (currentRoom != null)
+            {
+                string builtMessage = await user.BuildMessageAsync(message);
 
                 await Clients.Group(currentRoom.ToString()).SendAsync("ReceiveMessage", builtMessage);
 
-                var room = _grains.GetGrain<IRoomGrain>(currentRoom.Value);
+                IRoomGrain room = _grains.GetGrain<IRoomGrain>(currentRoom.Value);
 
                 await room.SaveMessageAsync(builtMessage);
             }
@@ -37,7 +55,7 @@ namespace CloudChat.Hubs
 
         public async Task ChangeRoom(string username, int roomId)
         {
-            var user = _grains.GetGrain<IUserGrain>(username);
+            IUserGrain user = _grains.GetGrain<IUserGrain>(username);
 
             int? currentRoom = await user.GetRoomIdAsync();
 
@@ -58,9 +76,9 @@ namespace CloudChat.Hubs
 
             await user.ChangeRoomAsync(roomId);
 
-            var room = _grains.GetGrain<IRoomGrain>(roomId);
+            IRoomGrain room = _grains.GetGrain<IRoomGrain>(roomId);
 
-            var messages = await room.GetLatestMessagesAsync();
+            string[] messages = await room.GetLatestMessagesAsync();
 
             await Clients.Client(Context.ConnectionId).SendAsync("BulkReceiveMessages", messages);
         }

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudChat", "CloudChat\CloudChat.csproj", "{54210E74-E103-42CD-A40D-F5DF51CCFCC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudChat", "CloudChat\CloudChat.csproj", "{54210E74-E103-42CD-A40D-F5DF51CCFCC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientChat", "ClientChat\ClientChat.csproj", "{CD2D8845-D14B-4595-9CA3-6D1AE13C81D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{54210E74-E103-42CD-A40D-F5DF51CCFCC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54210E74-E103-42CD-A40D-F5DF51CCFCC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54210E74-E103-42CD-A40D-F5DF51CCFCC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD2D8845-D14B-4595-9CA3-6D1AE13C81D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD2D8845-D14B-4595-9CA3-6D1AE13C81D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD2D8845-D14B-4595-9CA3-6D1AE13C81D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD2D8845-D14B-4595-9CA3-6D1AE13C81D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
