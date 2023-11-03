@@ -16,7 +16,7 @@ Before running the project, make sure you have the following prerequisites insta
 1. Clone the repository:
 
 ``` bash
-git clone https://github.com/yourusername/signalr-chat.git
+git clone https://github.com/EYazanS/CloudChat.git
 ```
 
 2. Navigate to the project directory:
@@ -29,6 +29,9 @@ cd signalr-chat
 
 - Update the Redis connection string in the appsettings.json file located in the Server directory. Replace your-redis-connection-string with your actual Redis connection string.
 
+``` bash
+cd CloudChat
+```
 ``` json
 "Redis":  "your-redis-connection-string"
 ```
@@ -36,7 +39,6 @@ cd signalr-chat
 3. Build and run the server:
 
 ``` bash
-cd CloudChat
 dotnet build
 dotnet run
 ```
@@ -48,7 +50,7 @@ The server will start and listen on a specified port (e.g., https://localhost:71
 - Navigate to the Client directory:
 
 ``` bash
-cd ../ClientChat
+cd ClientChat
 ```
 
 - Run the client:
