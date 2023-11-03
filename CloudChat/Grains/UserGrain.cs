@@ -4,7 +4,8 @@ namespace CloudChat.Grains
 {
     public interface IUserGrain : IGrainWithStringKey
     {
-        Task ChangeRoom(int roomId);
+        Task ChangeRoomAsync(int roomId);
+        Task<int?> GetRoomIdAsync();
     }
 
     public class UserGrain : Grain, IUserGrain
@@ -17,16 +18,32 @@ namespace CloudChat.Grains
             _state = new UrlDetails
             {
                 Username = this.GetPrimaryKeyString(),
-                CurrentRoom = null
+                CurrentRoomId = null,
+                RoomLoginsStates = new Dictionary<int, int>()
             };
 
             _grains = grains;
         }
 
-        public Task ChangeRoom(int roomId)
+        public Task ChangeRoomAsync(int roomId)
         {
-            _state.CurrentRoom = roomId;
+            if (_state.RoomLoginsStates.ContainsKey(roomId))
+            {
+                _state.RoomLoginsStates[roomId]++;
+            }
+            else
+            {
+                _state.RoomLoginsStates[roomId] = 1;
+            }
+
+            _state.CurrentRoomId = roomId;
+
             return Task.CompletedTask;
+        }
+
+        public Task<int?> GetRoomIdAsync()
+        {
+            return Task.FromResult(_state.CurrentRoomId);
         }
     }
 
@@ -34,6 +51,8 @@ namespace CloudChat.Grains
     {
         public string Username { get; set; }
 
-        public int? CurrentRoom { get; set; }
+        public int? CurrentRoomId { get; set; }
+
+        public Dictionary<int, int> RoomLoginsStates { get; set; }
     }
 }
