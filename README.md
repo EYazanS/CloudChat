@@ -22,7 +22,7 @@ git clone https://github.com/EYazanS/CloudChat.git
 2. Navigate to the project directory:
 
 ``` bash
-cd signalr-chat
+cd CloudChat
 ```
 
 3. Server Setup:
