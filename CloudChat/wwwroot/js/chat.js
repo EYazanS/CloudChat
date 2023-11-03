@@ -4,21 +4,36 @@ var username = "";
 
 document.getElementById("sendButton").disabled = true;
 
-function appendMessage(message) {
+function appendMessage(message, textColor = "#000") {
     var li = document.createElement("li");
     document.getElementById("messagesList").appendChild(li);
+    li.style.color = textColor;
     li.textContent = message;
 }
 
-connection.on("ReceiveMessage", appendMessage);
+connection.on("ReceiveMessage", function (message) { appendMessage(message) });
 
-connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
-}).catch(function (err) {
-    return console.error(err.toString());
+connection.on("ReceiveError", function (message) { appendMessage(message, "#FF0000") });
+
+connection.on("BulkReceiveMessages", function (messages) {
+    console.log({ messages })
+    messages.forEach(message => {
+        appendMessage(message);
+    })
 });
 
-document.getElementById("sendButton").addEventListener("click", function (event) {
+connection
+    .start()
+    .then(function () {
+        document.getElementById("sendButton").disabled = false;
+    })
+    .catch(function (err) {
+        return console.error(err.toString());
+    });
+
+document.getElementById("commands-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
     var message = document.getElementById("messageInput").value;
 
     var words = message.split(' ');
@@ -29,8 +44,6 @@ document.getElementById("sendButton").addEventListener("click", function (event)
     }
 
     if (words[0].toLocaleLowerCase() == "room") {
-        console.log(words);
-
         connection
             .invoke("ChangeRoom", username, +words[1])
             .catch(function (err) {
@@ -48,14 +61,16 @@ document.getElementById("sendButton").addEventListener("click", function (event)
         appendMessage("Unknown command, please type SEND then a message or room and then a room nunmber");
     }
 
-    event.preventDefault();
+    document.getElementById("messageInput").value = "";
 });
-document.getElementById("loginButton").addEventListener("click", function (event) {
+
+document.getElementById("login-form").addEventListener("submit", function (event) {
     username = document.getElementById("username").value;
 
     document.getElementById("login-page").style.display = "none";
     document.getElementById("chat-page").style.display = "block";
-
-
+    document.getElementById("messageInput").focus();
     event.preventDefault();
 });
+
+document.getElementById("username").focus();

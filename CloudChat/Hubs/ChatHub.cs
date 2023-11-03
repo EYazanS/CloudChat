@@ -21,7 +21,17 @@ namespace CloudChat.Hubs
 
             if (currentRoom != null)
             {
-                await Clients.Group(currentRoom.ToString()).SendAsync("ReceiveMessage", user, message);
+                var builtMessage = await user.BuildMessageAsync(message);
+
+                await Clients.Group(currentRoom.ToString()).SendAsync("ReceiveMessage", builtMessage);
+
+                var room = _grains.GetGrain<IRoomGrain>(currentRoom.Value);
+
+                await room.SaveMessageAsync(builtMessage);
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveError", "Please join a room by typing ROOM and then room number");
             }
         }
 
@@ -47,6 +57,12 @@ namespace CloudChat.Hubs
             await Clients.Group(newRoomId).SendAsync("ReceiveMessage", $"{username} has joined the room!");
 
             await user.ChangeRoomAsync(roomId);
+
+            var room = _grains.GetGrain<IRoomGrain>(roomId);
+
+            var messages = await room.GetLatestMessagesAsync();
+
+            await Clients.Client(Context.ConnectionId).SendAsync("BulkReceiveMessages", messages);
         }
 
         public override Task OnConnectedAsync()
